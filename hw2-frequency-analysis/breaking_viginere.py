@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 from collections import Counter
 from itertools import cycle
@@ -7,26 +7,26 @@ import re
 
 
 def get_text():
-    with open('ulysses', 'r') as f:
-        # strip punctuation
-        text = ''.join(
-            list(filter(lambda ch: ch not in set(string.punctuation), f.read())))
+    """keep only ascii letters + numbers
+    """
 
-        # remove new lines and convert to uppercase
-        return ''.join(text.split()).upper()
+    with open("ulysses", "r") as f:
+        return "".join(
+            [ch for ch in f.read() if ch in (string.ascii_letters + string.digits)]
+        ).upper()
 
-    return ''
+    return ""
 
 
 def get_cipher(bytes=False):
-    filename = 'transmission3'
+    filename = "transmission3"
 
     if bytes:
-        return open(filename, 'rb').read()
+        return open(filename, "rb").read()
 
-    with open(filename, 'r') as f:
+    with open(filename, "r") as f:
         return f.read()
-    return ''
+    return ""
 
 
 def xor_ch(a, b):
@@ -42,32 +42,35 @@ def break_viginere(plaintext, ciphertext):
     to_decrypt = [xor_ch(a, b) for (a, b) in zip(plaintext, cycle(ciphertext))]
 
     # convert the result to string
-    text_to_decrypt = ''.join(to_decrypt)
+    text_to_decrypt = "".join(to_decrypt)
 
-    found_key = ''
+    found_key = ""
     for key_len in range(1, len(text_to_decrypt)):
-        counter = Counter(text_to_decrypt[j: j + key_len]
-                          for j in range(len(text_to_decrypt) - key_len))
-        key, found_count = counter.most_common(1)[0]
-
         # skip small words
         if key_len < 3:
             continue
 
-        # if a key appears less than 5 times, break
-        if found_count > 5:
-            print(
-                f'key_len: {key_len}  found_count: {found_count}  key: {key}'
-            )
+        # get potential keys
+        potential_keys = [
+            text_to_decrypt[i : i + key_len]
+            for i in range(len(text_to_decrypt) - key_len)
+        ]
+
+        # use counter to get the most common key
+        counter = Counter(potential_keys)
+        key, found_count = counter.most_common(1)[0]
+
+        # if a key appears less than 20 times, break
+        if found_count > 20:
+            print(f"key_len: {key_len}  found_count: {found_count}  key: {key}")
             found_key = key
         else:
             break
 
     # get the decrypted text by XORing the key char with the ciphertext char
-    decrypted_text = [xor_ch(a, b)
-                      for (a, b) in zip(cycle(found_key), ciphertext)]
+    decrypted_text = [xor_ch(a, b) for (a, b) in zip(cycle(found_key), ciphertext)]
 
-    return ''.join(decrypted_text), found_key
+    return "".join(decrypted_text), found_key
 
 
 def main():
@@ -76,9 +79,9 @@ def main():
 
     if len(plaintext) > 0 and len(ciphertext) > 0:
         decrypted, key = break_viginere(plaintext, ciphertext)
-        print('---------------------------------------------')
-        print(f'Key: {key}')
-        print('Found text: ')
+        print("---------------------------------------------")
+        print(f"Key: {key}")
+        print("Found text: ")
         print(decrypted)
 
 

@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 
 import sys
-# 3. kasiski's analysis
 
 # 2. c[i] = P[i] ^ k[i]
-transmission1 = open('./transmission1', 'rb').read()
-transmission2 = open('./transmission2', 'rb').read()
-plaintext = open('./plain', 'r').read()
+transmission1 = open('transmission1', 'rb').read()
+transmission2 = open('transmission2', 'rb').read()
+plaintext = open('plain', 'r').read()
 
 idx = 0
 key = ''
@@ -25,5 +24,5 @@ for c in transmission2:
     plain2 += chr(c ^ ord(actual_key[i % len(actual_key)]))
     i += 1
 
-# The summer evening...
+print(f'key = {actual_key}')
 print(plain2)
